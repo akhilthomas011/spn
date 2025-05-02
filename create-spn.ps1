@@ -19,10 +19,11 @@ An array of RBAC roles to assign to the SPN in the specified subscription. This 
 
 .EXAMPLE
 # Example usage of the script
-.\create-spn.ps1 -spnName "MyServicePrincipal" -subscriptionId "12345" -roles @("Owner", "Contributor")
+. .\create-spn.ps1 
+New-ServicePrincipal -spnName "MydemoServicePrincipal" -subscriptionId 361e9cf5-a5de-4ac8-8d6f-4f0349463032 -roles @("Owner")
 
-This command creates an SPN named "MyServicePrincipal" in Microsoft Entra ID and assigns it the 'Owner' and 'Contributor' roles in the subscription 
-with ID "12345", if these do not already exist.
+This command creates an SPN named "MyServicePrincipal" in Microsoft Entra ID and assigns it the 'Owner' role in the subscription 
+with ID "361e9cf5-a5de-4ac8-8d6f-4f0349463032", if these do not already exist.
 
 .NOTES
 - Ensure that you are logged into Azure CLI with sufficient permissions to create SPNs and assign roles.
