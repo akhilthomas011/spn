@@ -59,7 +59,7 @@ function New-SPNwithRBAC {
     if (-not $existingSPN) {
         try {
             Write-Host "SPN '$spnName' does not exist. Creating a new SPN..."
-            $spn = az ad sp create-for-rbac --name $spnName --skip-assignment | ConvertFrom-Json
+            $spn = az ad sp create-for-rbac --name $spnName | ConvertFrom-Json
             Write-Host "SPN '$spnName' created successfully."
         }
         catch {
