@@ -32,14 +32,17 @@ The script outputs the following details:
 - SPN Application ID
 #>
 
-function New-SPN {
+function New-SPNwithRBAC {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
         [string]$spnName,
 
         [Parameter(Mandatory = $true)]
-        [string]$subscriptionId
+        [string]$subscriptionId,
+
+        [Parameter(Mandatory = $true)]
+        [string[]]$roles
     )
 
     try {
@@ -67,28 +70,30 @@ function New-SPN {
         Write-Host "SPN '$spnName' already exists. Skipping creation."
     }
 
-    # Check if the SPN has 'Owner' role assignment in the subscription
-    try {
-        $roleAssignment = az role assignment list --assignee $spn.appId --scope "/subscriptions/$subscriptionId" --role "Owner" | ConvertFrom-Json
-    }
-    catch {
-        Write-Error "Failed to check role assignment for SPN '$spnName': $_"
-        throw
-    }
-
-    if (-not $roleAssignment) {
+    foreach ($role in $roles) {
+        # Check if the SPN has the specified role assignment in the subscription
         try {
-            Write-Host "Assigning 'Owner' role to SPN '$spnName' in subscription '$subscriptionId'..."
-            az role assignment create --assignee $spn.appId --role "Owner" --scope "/subscriptions/$subscriptionId"
-            Write-Host "'Owner' role assigned successfully."
+            $roleAssignment = az role assignment list --assignee $spn.appId --scope "/subscriptions/$subscriptionId" --role $role | ConvertFrom-Json
         }
         catch {
-            Write-Error "Failed to assign 'Owner' role to SPN '$spnName': $_"
+            Write-Error "Failed to check role assignment for SPN '$spnName' and role '$role': $_"
             throw
         }
-    }
-    else {
-        Write-Host "SPN '$spnName' already has 'Owner' role in subscription '$subscriptionId'. Skipping role assignment."
+
+        if (-not $roleAssignment) {
+            try {
+                Write-Host "Assigning '$role' role to SPN '$spnName' in subscription '$subscriptionId'..."
+                az role assignment create --assignee $spn.appId --role $role --scope "/subscriptions/$subscriptionId"
+                Write-Host "'$role' role assigned successfully."
+            }
+            catch {
+                Write-Error "Failed to assign '$role' role to SPN '$spnName': $_"
+                throw
+            }
+        }
+        else {
+            Write-Host "SPN '$spnName' already has '$role' role in subscription '$subscriptionId'. Skipping role assignment."
+        }
     }
 
     # Output SPN details
