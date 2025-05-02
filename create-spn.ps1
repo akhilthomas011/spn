@@ -2,24 +2,27 @@
 
 <#
 .SYNOPSIS
-Creates a new Service Principal Name (SPN) in Microsoft Entra ID (Azure AD) and assigns it the 'Owner' role in a specified subscription.
+Creates a new Service Principal Name (SPN) in Microsoft Entra ID (Azure AD) and assigns it specified RBAC roles in a given subscription.
 
 .DESCRIPTION
 This script checks if an SPN with a specific name already exists in Microsoft Entra ID. If it does not exist, the script creates the SPN. 
-Additionally, it assigns the SPN the specified RBAC role in the specified Azure subscription if the role assignment does not already exist. 
+Additionally, it assigns the SPN the specified RBAC roles in the specified Azure subscription if the role assignments do not already exist. 
 
 .PARAMETER spnName
 The name of the Service Principal Name (SPN) to be created. This is a required parameter.
 
 .PARAMETER subscriptionId
-The Azure subscription ID where the SPN will be assigned the 'Owner' role. This is a required parameter.
+The Azure subscription ID where the SPN will be assigned the specified roles. This is a required parameter.
+
+.PARAMETER roles
+An array of RBAC roles to assign to the SPN in the specified subscription. This is a required parameter.
 
 .EXAMPLE
 # Example usage of the script
-.\create-spn.ps1 -spnName "MyServicePrincipal" -subscriptionId "12345"
+.\create-spn.ps1 -spnName "MyServicePrincipal" -subscriptionId "12345" -roles @("Owner", "Contributor")
 
-This command creates an SPN named "MyServicePrincipal" in Microsoft Entra ID and assigns it the 'Owner' role in the subscription with ID "12345", 
-if these do not already exist.
+This command creates an SPN named "MyServicePrincipal" in Microsoft Entra ID and assigns it the 'Owner' and 'Contributor' roles in the subscription 
+with ID "12345", if these do not already exist.
 
 .NOTES
 - Ensure that you are logged into Azure CLI with sufficient permissions to create SPNs and assign roles.
@@ -29,7 +32,6 @@ if these do not already exist.
 .OUTPUTS
 The script outputs the following details:
 - SPN Name
-- SPN Application ID
 #>
 
 function New-SPNwithRBAC {
@@ -98,5 +100,4 @@ function New-SPNwithRBAC {
 
     # Output SPN details
     Write-Host "SPN Name: $spnName"
-    Write-Host "SPN Application ID: $($spn.appId)"
 }
