@@ -146,3 +146,49 @@ function New-ServicePrincipal {
     # Output SPN details
     Write-Host "SPN Name: $spnName"
 }
+
+
+function New-SecurityGroup {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$groupName
+    )
+
+    $ErrorActionPreference = "Stop"
+
+    try {
+        # Check if the security group already exists
+        $existingGroup = az ad group list --filter "displayName eq '$groupName'" | ConvertFrom-Json
+        if ($? -eq $false) {
+            throw 'Failed to check security group.'
+        }
+    }
+    catch {
+        Write-Error "Failed to check if security group '$groupName' exists: $_"
+        throw
+    }
+
+    if (-not $existingGroup) {
+        try {
+            Write-Host "Security group '$groupName' does not exist. Creating a new security group..."
+            $group = az ad group create --display-name $groupName --mail-nickname $groupName | ConvertFrom-Json
+            if ($? -eq $false) {
+                throw 'Failed to create security group.'
+            }
+            Write-Host "Security group '$groupName' created successfully."
+        }
+        catch {
+            Write-Error "Failed to create security group '$groupName': $_"
+            throw
+        }
+    }
+    else {
+        $group = $existingGroup[0]
+        Write-Host "Security group '$groupName' already exists. Skipping creation."
+    }
+
+    # Output security group object ID
+    Write-Host "Security Group Object ID: $($group.id)"
+    return $group.id
+}
